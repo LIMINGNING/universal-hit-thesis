@@ -1,0 +1,546 @@
+\documentclass{sintefbeamer}
+\usepackage[UTF8]{ctex}
+\setCJKmainfont[BoldFont=Songti SC Bold]{Songti SC}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+\renewcommand{\strtoc}{目录}
+\newcolumntype{B}[1]{>{\bfseries\raggedright\arraybackslash}p{#1}}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\tablebody}{\footnotesize\renewcommand{\arraystretch}{1.16}}
+
+\title{面向开放域问答的\\工具调用智能体设计与优化}
+\subtitle{本科毕业设计开题报告}
+\author[李明柠]{\texorpdfstring{%
+  \begin{tabular}{@{}l@{}}
+    李明柠 \quad 2023311423\\[0.3em]
+    指导教师：陈科海
+  \end{tabular}%
+}{李明柠 2023311423 指导教师：陈科海}}
+
+\date{2026年4月}
+\titlebackground{images/background}
+
+% 覆盖模板默认的极小 block 字号；正文保持 small，避免三栏页过挤
+\setbeamerfont{block title}{series=\bfseries\centering, size=\normalsize}
+\setbeamerfont{block body}{size=\small}
+
+\newcommand{\kw}[1]{\textbf{\textcolor{sintefblue}{#1}}}
+\newcommand{\muted}[1]{\textcolor{airforceblue}{#1}}
+\newcommand{\tinyurl}[1]{\texttt{\scriptsize #1}}
+\newcommand{\tightlist}{\setlength{\itemsep}{0.45em}\setlength{\parskip}{0pt}}
+\newcommand{\smalltag}[1]{%
+  \tikz[baseline=(x.base)] \node[draw=sintefblue, rounded corners=1.5pt,
+  inner xsep=4pt, inner ysep=1.5pt, line width=.45pt, text=sintefblue,
+  font=\footnotesize] (x) {#1};%
+}
+\newcommand{\metric}[2]{%
+  \begin{minipage}[t]{0.22\textwidth}
+    \centering
+    {\Large\bfseries\textcolor{sintefblue}{#1}}\\[-0.1em]
+    {\scriptsize #2}
+  \end{minipage}
+}
+
+\begin{document}
+
+\maketitle
+
+% \begin{frame}{目录}{\,}
+%   \tableofcontents[hideallsubsections]
+% \end{frame}
+
+\section{背景与意义}
+
+\begin{frame}{汇报主线：从问题到验证}
+  \begin{columns}[T]
+    \begin{column}{0.47\textwidth}
+      \begin{block}{为什么做}
+        开放域问答经常涉及最新事实、长尾实体和多跳关系，单靠模型参数记忆难以稳定回答。
+      \end{block}
+      \vspace{0.45em}
+      \begin{block}{问题在哪}
+        现有检索增强方法常见问题是触发不稳、查询不准、网页证据噪声大和调用成本不可控。
+      \end{block}
+    \end{column}
+    \begin{column}{0.47\textwidth}
+      \begin{block}{怎么解决}
+        围绕“何时搜、搜什么、怎么用”，设计检索触发、查询改写、证据压缩和预算控制模块。
+      \end{block}
+      \vspace{0.45em}
+      \begin{block}{怎么验证}
+        通过公开数据集与自建问题集，对准确性、检索有效性、调用效率和稳定性进行对比评测。
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vspace{0.7em}
+  \centering
+  \kw{答辩陈述重点：本课题解决的是外部信息获取链路不可控的问题。}
+\end{frame}
+
+\begin{frame}{课题背景：开放域问答需要外部知识}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \tightlist
+        \item 开放域问答面对未知主题、跨领域事实和多跳关系，单靠参数记忆难以保证准确。
+        \item 大语言模型具备较强的问题理解和生成能力，但仍受制于知识截止、长尾事实缺失和推理链误差传播。
+        \item 检索增强生成和工具调用智能体为模型接入搜索、网页阅读和证据整理能力提供了路径。
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{block}{核心矛盾}
+        \centering
+        模型会推理，\\
+        但不一定知道最新事实；\\[0.6em]
+        网页有答案，\\
+        但噪声、冗余和成本很高。
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{研究意义与实施意义}
+  \begin{columns}[T]
+    \begin{column}{0.47\textwidth}
+      \begin{block}{研究意义}
+        \begin{itemize}
+          \tightlist
+          \item \kw{何时搜}：判断时间敏感、长尾事实和多跳关系，避免漏搜或过度检索。
+          \item \kw{搜什么}：将复杂问题拆成实体、关系和约束明确的可执行查询。
+          \item \kw{怎么用}：从网页长文本中抽取结构化证据，增强答案可追溯性。
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.47\textwidth}
+      \begin{block}{实施意义}
+        \begin{itemize}
+          \tightlist
+          \item \kw{真实问答}：覆盖最新事实、长尾实体和跨网页信息，减少参数记忆缺口。
+          \item \kw{系统落地}：串联搜索、阅读、证据整理和答案生成，并记录日志与预算。
+          \item \kw{可信生成}：让答案建立在短证据和来源 URL 上，降低无证据断言。
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vspace{0.8em}
+  \centering
+  \kw{核心价值：把智能体检索从“接入工具”推进到“控制调用链路”。}
+\end{frame}
+
+\section{研究现状}
+
+\begin{frame}{相关研究脉络}
+  \tablebody
+  \begin{tabularx}{\textwidth}{B{2.4cm}YP{4.0cm}}
+    \toprule
+    方向 & 代表思路 & 启示与不足 \\
+    \midrule
+    检索增强生成 & RAG 在生成前引入外部文档，缓解模型知识不足 & 典型流程多为一次性检索，难覆盖多跳中间事实 \\
+    \addlinespace
+    智能体工具调用 & WebGPT、ReAct、Self-Ask、IRCoT 等将搜索/阅读嵌入推理过程 & 能动态补充信息，但容易出现重复搜索、查询过宽和无关网页干扰 \\
+    \addlinespace
+    网页检索增强推理 & Search-R1、Search-o1、WebThinker 等强调多轮搜索、网页阅读和证据整合 & 真实网页存在长文本噪声、正文抽取失败和调用成本控制问题 \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{现有问题分析}
+  \begin{columns}[T]
+    \begin{column}{0.31\textwidth}
+      \begin{block}{触发不稳}
+        简单问题过度检索，复杂事实又可能漏搜，造成成本浪费或幻觉回答。
+      \end{block}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \begin{block}{查询不准}
+        原始长问题直接搜索时，实体、关系和约束不清，影响关键网页召回。
+      \end{block}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \begin{block}{证据噪声}
+        网页正文长且杂，若直接注入上下文，会放大无关信息和 token 消耗。
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vspace{0.8em}
+  \begin{center}
+    \kw{本课题聚焦：检索触发、查询改写、网页证据压缩与调用预算控制。}
+  \end{center}
+\end{frame}
+
+\begin{frame}{方法解决的问题}
+  \tablebody
+  \begin{tabularx}{\textwidth}{B{2.0cm}YP{4.6cm}}
+    \toprule
+    问题 & 方法设计 & 解决效果 \\
+    \midrule
+    触发不稳 & 规则信号 + 模型自评，判断时间敏感、长尾事实、多跳关系和证据缺口 & 降低简单问题过度检索，减少复杂问题漏检导致的幻觉回答 \\
+    \addlinespace
+    查询不准 & 将复杂问题拆成带实体、关系和约束的子查询，并记录检索目的 & 提升关键网页召回质量，避免直接搜索长自然语言问题 \\
+    \addlinespace
+    证据噪声 & 网页正文抽取后进行证据压缩，输出事实、URL、子目标和相关性评分 & 减少长网页注入造成的噪声和 token 成本，增强答案可追溯性 \\
+    \addlinespace
+    调用膨胀 & 查询去重、URL 去重、证据哈希、最大轮数和 token 预算控制 & 控制搜索次数、读取网页数、响应延迟和 API 成本 \\
+    \bottomrule
+  \end{tabularx}
+  % \vspace{0.5em}
+  % \centering
+  % {\scriptsize 核心表述：方法解决的不是单点模型能力问题，而是开放域问答中外部信息获取链路不可控的问题。}
+\end{frame}
+
+\section{研究方案}
+
+\begin{frame}{主要研究内容}
+  \begin{enumerate}
+    \tightlist
+    \item \kw{构建原型系统}：实现开放域问答检索工具调用智能体，支持问题输入、多轮搜索、网页读取、证据整理和答案生成。
+    \item \kw{设计多轮检索流程}：形成“推理--搜索--阅读--整理--继续推理”的循环，并记录查询、URL、网页片段和使用状态。
+    \item \kw{实现证据压缩模块}：将网页正文转化为短而可验证的结构化证据，包括事实、来源、关联子目标和相关性判断。
+    \item \kw{开展链路优化评测}：比较直接回答、单次 RAG、多轮检索智能体和改进系统在准确性、效率与稳定性上的差异。
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{系统总体架构}
+  \centering
+  % 原 TikZ 版本，保留以便对照检查：
+  % \begin{tikzpicture}[
+  %   node distance=0.7cm and 0.6cm,
+  %   module/.style={draw=sintefblue, rounded corners=2pt, line width=.55pt,
+  %     minimum width=2.35cm, minimum height=0.82cm, align=center, font=\footnotesize},
+  %   data/.style={draw=airforceblue, rounded corners=2pt, line width=.45pt,
+  %     minimum width=2.35cm, minimum height=0.72cm, align=center, font=\footnotesize},
+  %   arrow/.style={-{Latex[length=2mm]}, line width=.55pt, draw=sintefblue}
+  % ]
+  %   \node[module] (q) {用户问题};
+  %   \node[module, right=of q] (analysis) {问题分析\\类型/实体/时效};
+  %   \node[module, right=of analysis] (control) {检索控制\\触发/查询/预算};
+  %   \node[module, right=of control] (search) {搜索工具\\候选网页};
+  %
+  %   \node[module, below=of search] (read) {网页抽取\\正文清洗};
+  %   \node[module, left=of read] (evidence) {证据整理\\压缩/去重/排序};
+  %   \node[module, left=of evidence] (answer) {答案生成\\依据与不确定性};
+  %   \node[data, below=of evidence] (state) {任务状态\\历史/证据/预算};
+  %
+  %   \draw[arrow] (q) -- (analysis);
+  %   \draw[arrow] (analysis) -- (control);
+  %   \draw[arrow] (control) -- (search);
+  %   \draw[arrow] (search) -- (read);
+  %   \draw[arrow] (read) -- (evidence);
+  %   \draw[arrow] (evidence) -- (answer);
+  %   \draw[arrow] (state) -- (control);
+  %   \draw[arrow] (evidence) -- (state);
+  %   \draw[arrow] (control.north) to[out=125,in=55,looseness=1.25] (analysis.north);
+  % \end{tikzpicture}
+
+  \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{images/系统.png}
+
+  \vspace{0.2em}
+  {\footnotesize 系统以大语言模型为推理核心，围绕网页文本检索工具形成可记录、可控制、可评测的调用链路。}
+\end{frame}
+
+\begin{frame}{模块设计}
+  \tablebody
+  \begin{tabularx}{\textwidth}{B{2.35cm}YP{3.6cm}}
+    \toprule
+    模块 & 主要功能 & 实现方式 \\
+    \midrule
+    问题分析模块 & 识别问题类型、实体、时间敏感性和多跳需求 & 大模型 API + 提示词约束 \\
+    检索控制模块 & 决定是否搜索、生成查询、控制最大轮数和调用预算 & 规则信号 + 模型自评 \\
+    搜索工具模块 & 调用搜索引擎并返回候选结果 & 开放搜索接口，预留替代接口 \\
+    网页抽取模块 & 读取 URL、清洗 HTML、提取正文和标题 & readability / trafilatura / Jina Reader 类工具 \\
+    证据整理模块 & 抽取相关事实、去重、排序、记录来源 & 证据压缩提示词 + 规则整理 \\
+    答案生成模块 & 综合证据生成最终答案并输出依据 & 大模型 API + 结构化证据输入 \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{技术路线}
+  \centering
+  % 原 TikZ 版本，保留以便对照检查：
+  % \begin{tikzpicture}[
+  %   route/.style={draw=sintefblue, rounded corners=2pt, line width=.55pt,
+  %     minimum width=2.25cm, minimum height=0.78cm, align=center, font=\footnotesize},
+  %   budget/.style={draw=airforceblue, dashed, rounded corners=2pt,
+  %     minimum width=8.7cm, minimum height=0.62cm, align=center, font=\footnotesize, text=airforceblue},
+  %   arrow/.style={-{Latex[length=2mm]}, line width=.55pt, draw=sintefblue}
+  % ]
+  %   \node[route] (a) {问题分析\\检索触发};
+  %   \node[route, right=0.45cm of a] (b) {查询生成\\与改写};
+  %   \node[route, right=0.45cm of b] (c) {外部检索\\候选筛选};
+  %   \node[route, right=0.45cm of c] (d) {网页读取\\正文抽取};
+  %   \node[route, below=0.78cm of d] (e) {证据整理\\压缩去重};
+  %   \node[route, left=0.45cm of e] (f) {答案生成\\来源说明};
+  %
+  %   \draw[arrow] (a) -- (b);
+  %   \draw[arrow] (b) -- (c);
+  %   \draw[arrow] (c) -- (d);
+  %   \draw[arrow] (d) -- (e);
+  %   \draw[arrow] (e) -- (f);
+  % \end{tikzpicture}
+  % \vspace{0.8em}
+  %
+  % \smalltag{证据不足时进入下一轮}
+  % \smalltag{最大轮数}
+  % \smalltag{最大 URL 数}
+  % \smalltag{token 预算}
+  % \smalltag{响应时间与费用记录}
+  %
+  % \vspace{0.55em}
+  %
+  % {\footnotesize 基本流程覆盖查询生成、外部检索、网页读取、证据整理与答案生成，优化环节贯穿整个调用链路。}
+
+  \includegraphics[width=0.96\textwidth,height=0.60\textheight,keepaspectratio]{images/技术路线.jpg}
+  \vspace{0.8em}
+  
+  \smalltag{证据不足时进入下一轮}
+  \smalltag{最大轮数}
+  \smalltag{最大 URL 数}
+  \smalltag{token 预算}
+  \smalltag{响应时间与费用记录}
+  
+  \vspace{0.55em}
+  
+  {\footnotesize 基本流程覆盖查询生成、外部检索、网页读取、证据整理与答案生成，优化环节贯穿整个调用链路。}
+\end{frame}
+
+\section{关键优化}
+
+\begin{frame}{优化一：自适应检索触发}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{触发信号}
+        \begin{itemize}
+          \tightlist
+          \item 时间表达或最新事实
+          \item 长尾实体、专业事实
+          \item 多实体比较或多跳关系
+          \item 模型自评“缺少证据”
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{控制目标}
+        \begin{itemize}
+          \tightlist
+          \item 简单问题尽量直接回答
+          \item 复杂事实主动补充外部证据
+          \item 通过最大轮数、URL 数和 token 预算限制过度调用
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{优化二：查询生成与改写}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{原始问题}
+        \small
+        “甲和乙是否出生在同一城市？”
+      \end{block}
+      \vspace{0.4em}
+      \begin{block}{直接搜索的问题}
+        \small
+        查询过长、意图混合，容易召回泛化页面或问答噪声。
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{改写策略}
+        \begin{itemize}
+          \tightlist
+          \item 明确每个查询的检索目的
+          \item 拆分为关键实体 + 关系词
+          \item 保留必要时间、地点和限定条件
+        \end{itemize}
+      \end{block}
+      \vspace{0.4em}
+      \smalltag{甲 birth place}
+      \smalltag{乙 birth place}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{优化三：网页证据压缩}
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      \begin{block}{输入}
+        \begin{itemize}
+          \tightlist
+          \item 当前问题与子目标
+          \item 搜索查询与网页 URL
+          \item 网页标题、摘要、正文片段
+          \item 已有推理状态
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \begin{block}{输出结构}
+        \begin{tabular}{@{}ll@{}}
+          \kw{fact} & 可验证事实 \\
+          \kw{url} & 来源链接 \\
+          \kw{goal} & 支持的子问题 \\
+          \kw{time} & 证据时间 \\
+          \kw{score} & 相关性评分 \\
+        \end{tabular}
+      \end{block}
+      \vspace{0.4em}
+      {\footnotesize 目标：让主模型接收短证据，而不是整篇网页。}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{优化四：冗余调用与预算控制}
+  \begin{center}
+    \begin{tikzpicture}[
+      flowstep/.style={draw=sintefblue, rounded corners=2pt, minimum width=2.8cm,
+      minimum height=.8cm, align=center, font=\footnotesize},
+      arrow/.style={-{Latex[length=2mm]}, draw=sintefblue, line width=.55pt}
+    ]
+      \node[flowstep] (a) {查询去重};
+      \node[flowstep, right=0.7cm of a] (b) {URL 去重};
+      \node[flowstep, right=0.7cm of b] (c) {证据哈希};
+      \node[flowstep, below=0.75cm of b] (d) {新增证据价值判断};
+      \node[flowstep, below=0.75cm of d] (e) {达到预算或证据充分时停止};
+
+      \draw[arrow] (a) -- (b);
+      \draw[arrow] (b) -- (c);
+      \draw[arrow] (b) -- (d);
+      \draw[arrow] (c) -- (d);
+      \draw[arrow] (d) -- (e);
+    \end{tikzpicture}
+  \end{center}
+  \vspace{0.3em}
+  \centering
+  \smalltag{平均搜索次数}
+  \smalltag{平均读取网页数}
+  \smalltag{token 消耗}
+  \smalltag{响应时间}
+  \smalltag{API 成本}
+\end{frame}
+
+\section{实验与计划}
+
+\begin{frame}{实验方案}
+  \begin{columns}[T]
+    \begin{column}{0.47\textwidth}
+      \begin{block}{数据来源}
+        \begin{itemize}
+          \tightlist
+          \item HotpotQA：多跳实体关系推理
+          \item MuSiQue / 2WikiMultiHopQA：组合问答
+          \item GAIA：真实信息获取与工具使用
+          \item WebWalkerQA：网页检索与多步定位
+          \item 自建网页文本问题集
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.47\textwidth}
+      \begin{block}{对比方法}
+        \begin{itemize}
+          \tightlist
+          \item Direct LLM：不检索直接回答
+          \item Standard RAG：原始问题单次检索
+          \item Agentic Search：多轮搜索，无独立证据压缩
+          \item Ours：加入触发、改写、压缩和预算控制
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{评价指标}
+  \centering
+  \tablebody
+  \begin{tabularx}{\textwidth}{B{2.35cm}Y}
+    \toprule
+    指标类别 & 具体度量 \\
+    \midrule
+    答案准确性 & Exact Match、F1；自建问题采用人工核验或证据一致性评分 \\
+    检索有效性 & 支持答案网页命中率、有效证据占比、证据相关性 \\
+    工具调用效率 & 平均搜索次数、平均读取网页数、响应时间、token 消耗、API 费用 \\
+    推理稳定性 & 同一问题多次运行的答案一致性、证据一致性和失败率 \\
+    可解释性 & 最终答案是否能对应明确证据来源，是否存在无证据断言 \\
+    \bottomrule
+  \end{tabularx}
+\end{frame}
+
+% \begin{frame}{进度安排}
+%   \scriptsize
+%   \begin{tabularx}{\textwidth}{>{\bfseries}p{2.5cm}X}
+%     \toprule
+%     时间 & 主要任务 \\
+%     \midrule
+%     2026年4月下旬 & 完成开题报告；阅读 RAG、ReAct、WebGPT、IRCoT 与网页信息获取相关论文，明确系统边界和指标。 \\
+%     2026年5月上旬 & 搭建基础原型，实现大模型 API、开放搜索接口、网页正文抽取和单轮 RAG 回答流程。 \\
+%     2026年5月中旬 & 完成多轮检索 Agent 主循环，实现检索历史、证据缓存、调用预算和异常处理。 \\
+%     2026年5月下旬 & 实现文档推理与证据压缩、查询改写、证据排序去重和主要优化方法。 \\
+%     2026年6月上旬 & 完成公开数据集子集和自建问题集实验，统计准确率、F1、调用次数、延迟和成本。 \\
+%     2026年6月中旬 & 完成实验分析、案例分析、论文初稿和系统代码整理，准备毕业答辩材料。 \\
+%     \bottomrule
+%   \end{tabularx}
+% \end{frame}
+
+\begin{frame}{预期成果与风险应对}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{预期成果}
+        \begin{itemize}
+          \tightlist
+          \item 可运行的开放域问答工具调用智能体原型
+          \item 可复现实验脚本与评测数据子集
+          \item 至少一种关键优化方法及消融实验
+          \item 实验结果表、案例分析和毕业论文
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{风险应对}
+        \begin{itemize}
+          \tightlist
+          \item 搜索接口：缓存、重试和备用接口
+          \item 网页噪声：长度、重复度、关键词覆盖过滤
+          \item 触发不稳：规则信号 + 模型自评 + 预算限制
+          \item 评价主观：公开指标 + 人工核验表
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{总结}
+  \begin{center}
+    \large
+    本课题面向开放域问答中的外部知识获取需求，\\[0.4em]
+    设计一个可运行、可控制、可评测的\\[0.4em]
+    \kw{网页检索工具调用智能体}。
+  \end{center}
+  \vspace{1em}
+  \begin{columns}[T]
+    \begin{column}{0.31\textwidth}
+      \centering
+      \kw{系统实现}\\
+      {\small 多轮检索与网页阅读流程}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \centering
+      \kw{链路优化}\\
+      {\small 触发、查询、证据、预算}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \centering
+      \kw{实验评测}\\
+      {\small 准确性、效率、稳定性}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\backmatter
+
+\end{document}
