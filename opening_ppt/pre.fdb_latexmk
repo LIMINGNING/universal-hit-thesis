@@ -1,11 +1,12 @@
 # Fdb version 4
-["xdvipdfmx"] 1779111727.83307 "pre.xdv" "pre.pdf" "pre" 1779111729.65016 0
-  "pre.xdv" 1779111727.72735 195048 75024aeb03e8f36cc1465d106ad680bd "xelatex"
+["xdvipdfmx"] 1779676810.37463 "pre.xdv" "pre.pdf" "pre" 1779676812.12057 0
+  "pre.xdv" 1779676810.29507 180588 797cf446ed3213c8b37d115c5bc2233a "xelatex"
   (generated)
   "pre.pdf"
   (rewritten before read)
-["xelatex"] 1779111726.12872 "pre.tex" "pre.xdv" "pre" 1779111729.64789 0
+["xelatex"] 1779676808.8351 "/Users/limingning/universal-hit-thesis/opening_ppt/pre.tex" "pre.xdv" "pre" 1779676812.11817 0
   "/System/Library/Fonts/Menlo.ttc" 1733559115 2156036 ec05dfca6821d85440da0899493002c3 ""
+  "/Users/limingning/universal-hit-thesis/opening_ppt/pre.tex" 1779676806.97872 21717 118fb08591ed10f9bb50588a9fea0a93 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm" 1246382020 916 f87d7c45f9c908e672703b83b72241a3 ""
@@ -299,11 +300,11 @@
   "images/hitsz_white.png" 1779010230.26976 101732 c7c9488ceaaf28606aff1dc7c1fed14f ""
   "images/技术路线.jpg" 1779109784.54616 170988 08725152ba63ffc7d8fe397c656ba035 ""
   "images/系统.png" 1779109803.59292 307619 b9159e3dd08bceadbc540e45968ebad9 ""
-  "pre.aux" 1779111727.72613 6131 90368dbb712644040fe3fdd62df4a3e7 "xelatex"
-  "pre.nav" 1779111727.7273 3293 5ed6c2b6f468a841c15a0a6363948c80 "xelatex"
-  "pre.out" 1779111727.72707 391 8d8630c6e6a2f2328af415e23944d817 "xelatex"
-  "pre.tex" 1779111711.40924 21667 3966fb374bb96535f2b3defce7d0d76b ""
-  "pre.toc" 1779111727.72732 249 ef19e8c62a5781749c412d01aebda7c9 "xelatex"
+  "pre.aux" 1779676810.294 5957 792aaf094eee5c36291aee6f20774239 "xelatex"
+  "pre.nav" 1779676810.29502 3198 7f33ccf9df342fde00afe99fcad7c01f "xelatex"
+  "pre.out" 1779676810.29481 391 8d8630c6e6a2f2328af415e23944d817 "xelatex"
+  "pre.tex" 1779676806.97872 21717 118fb08591ed10f9bb50588a9fea0a93 ""
+  "pre.toc" 1779676810.29504 248 28edd9482cb1d9113d7ad4af9211158d "xelatex"
   "sintefbeamer.cls" 1778980126 444 b9605ff6b7fb2eee1545f99582ba5bb2 ""
   "sintefcolor.sty" 1778980126 1092 2cd9122ee0a4156fac40a1e7ad866155 ""
   (generated)

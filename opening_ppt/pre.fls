@@ -2,7 +2,7 @@ PWD /Users/limingning/universal-hit-thesis/opening_ppt
 INPUT /usr/local/texlive/2025/texmf.cnf
 INPUT /usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2025/texmf-var/web2c/xetex/xelatex.fmt
-INPUT pre.tex
+INPUT /Users/limingning/universal-hit-thesis/opening_ppt/pre.tex
 OUTPUT pre.log
 INPUT ./sintefbeamer.cls
 INPUT sintefbeamer.cls
@@ -551,12 +551,6 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/sansmathaccent/mathker
 INPUT ./images/hitsz_white.png
 INPUT ./images/hitsz_white.png
 INPUT ./images/hitsz_white.png
-INPUT ./images/hitsz.png
-INPUT ./images/hitsz.png
-INPUT ./images/hitsz.png
-INPUT ./images/hitsz.png
-INPUT ./images/hitsz.png
-INPUT ./images/hitsz.png
 INPUT ./images/hitsz.png
 INPUT ./images/hitsz.png
 INPUT ./images/hitsz.png
