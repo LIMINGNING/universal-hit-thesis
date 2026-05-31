@@ -1,6 +1,24 @@
 /build/
 /fonts/
 /templates/*.pdf
+/opening_ppt/*.pdf
+
+### LaTeX auxiliary files ###
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.xdv
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos

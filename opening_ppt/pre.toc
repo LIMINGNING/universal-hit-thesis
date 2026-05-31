@@ -1,5 +1,0 @@
-\beamer@sectionintoc {1}{背景与意义}{2}{0}{1}
-\beamer@sectionintoc {2}{研究现状}{5}{0}{2}
-\beamer@sectionintoc {3}{研究方案}{9}{0}{3}
-\beamer@sectionintoc {4}{关键优化}{13}{0}{4}
-\beamer@sectionintoc {5}{实验与计划}{18}{0}{5}
